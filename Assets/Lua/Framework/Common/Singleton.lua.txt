@@ -1,0 +1,19 @@
+--[[
+    单例类基类(Global)
+]]
+
+local Singleton = Class("Singleton")
+
+function Singleton:GetInstance()
+    local instance = rawget(self, "_instance")
+    if instance == nil then
+        rawset(self, "_instance", self())
+    end
+    return self._instance
+end
+
+function Singleton:Delete()
+    rawset(self, "_instance", nil)
+end
+
+return Singleton

@@ -1,0 +1,74 @@
+--[[
+    MVC-M基类
+]]
+
+local UIManager = require "Framework.UI.UIManager"
+
+local ModelBase = Class("ModelBase")
+
+local function CacheListener(self, name, callback)
+    local callbackList = self.callbackDic[name] or {}
+    callbackList[callback] = false
+end
+
+local function ClearListener(self, name, callback)
+    local callbackList = self.callbackDic[name]
+    if callback == nil then
+        return
+    end
+    callbackList[name] = nil
+end
+
+function ModelBase:Ctor()
+    self.enabled = false
+    self.callbackDic = {}
+end
+
+function ModelBase:OnCreate()
+    self:OnAddListener()
+end
+
+function ModelBase:OnEnabled()
+    self.enabled = true
+end
+
+function ModelBase:OnDisabled()
+    self.enabled = false
+end
+
+function ModelBase:OnDestroy()
+    self:OnRemoveListener()
+    for name, callbackList in pairs(self.callbackDic) do
+        for callback, _ in pairs(callbackList) do
+            self:RemoveListener(name, callback)
+        end
+    end
+    self.callbackDic = {}
+end
+
+function ModelBase:OnAddListener()
+end
+
+function ModelBase:OnRemoveListener()
+end
+
+function ModelBase:AddListener(ob, name, callback)
+    CacheListener(self, name, callback)
+    UIManager:AddListener(ob, name, callback)
+end
+
+function ModelBase:Broadcast(name, ...)
+    UIManager:Broadcast(name, ...)
+end
+
+function ModelBase:RemoveListener(name, callback)
+    ClearListener(self, name, callback)
+    UIManager:RemoveListener(name, callback)
+end
+
+function ModelBase:Delete()
+    self.enabled = false
+    self.callbackDic = nil
+end
+
+return ModelBase

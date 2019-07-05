@@ -1,0 +1,16 @@
+--[[
+    具备更新能力的接口
+]]
+
+local IUpdate = Class("IUpdate")
+
+function IUpdate:Update()
+end
+
+function IUpdate:LateUpdate()
+end
+
+function IUpdate:FixedUpdate()
+end
+
+return IUpdate

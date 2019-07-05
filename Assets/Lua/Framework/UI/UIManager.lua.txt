@@ -1,0 +1,91 @@
+--[[
+    UI管理器
+    管理UI层级，打开、关闭UI，调度分发UI事件
+]]
+
+local ResManager = require "ResManager"
+
+local UIManager = Class("UIManager", Singleton)
+
+function UIManager:Ctor()
+    self.viewDic = {}
+    self.updateViewDic = {}
+    self.lateUpdateViewDic = {}
+    self.fixedUpdateViewDic = {}
+    self.msgCenter = MsgCenter()
+end
+
+function UIManager:OpenView(config)
+    local View = config.view
+    local Model = config.model
+    local Ctrl = config.ctrl
+    local windowName = config.windowName
+    local anim = config.anim
+
+    if self.viewDic[view.name] then
+
+    else
+        local window = CreateViewWindow(windowName)
+        local model = Model()
+        local ctrl = Ctrl(model)
+        local view = View(window, ctrl)
+        self.viewDic[view.name] = {
+            model = model,
+            ctrl = ctrl,
+        }
+    end
+end
+
+function UIManager:CreateViewWindow(name)
+    local loadConfig = {
+        name = name,
+        type = GameObject,
+        parent = "",
+    }
+    ResManager:GetInstance():Load(loadConfig, function(obj)
+
+    end)
+end
+
+function UIManager:HideView(config)
+end
+
+function UIManager:AddListener(ob, name, callback)
+    self.msgCenter:AddMsg(name, callback, ob)
+end
+
+function UIManager:Broadcast(name, ...)
+    self.msgCenter:Broadcast(name, ...)
+end
+
+function UIManager:RemoveListener(name, callback)
+    self.msgCenter:RemoveMsg(name, callback)
+end
+
+function UIManager:Update()
+    for _, view in pairs(self.updateViewDic) do
+        if view.Update then view:Update() end
+    end
+end
+
+function UIManager:LateUpdate()
+    for _, view in pairs(self.lateUpdateViewDic) do
+        if view.LateUpdate then view:LateUpdate() end
+    end
+end
+
+function UIManager:FixedUpdate()
+    for _, view in pairs(self.fixedUpdateViewDic) do
+        if view.FixedUpdate then view:FixedUpdate() end
+    end
+end
+
+function UIManager:Delete()
+    self.viewDic = nil
+    self.updateViewDic = nil
+    self.lateUpdateViewDic = nil
+    self.fixedUpdateViewDic = nil
+    self.msgCenter = nil
+end
+
+return UIManager

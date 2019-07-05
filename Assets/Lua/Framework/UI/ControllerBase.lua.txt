@@ -1,0 +1,15 @@
+--[[
+    MVC-C基类
+]]
+
+local ControllerBase = Class("ControllerBase")
+
+function ControllerBase:Ctor(model)
+    self.model = model
+end
+
+function ControllerBase:Delete()
+    self.model = nil
+end
+
+return ControllerBase

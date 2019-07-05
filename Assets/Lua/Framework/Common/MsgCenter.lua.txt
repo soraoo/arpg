@@ -1,0 +1,85 @@
+--[[
+    消息分发类
+    local msgCenter = MsgCenter()
+]]
+
+local MsgCenter = Class("MsgCenter")
+
+function MsgCenter:Ctor()
+    self.msgDic = {}
+end
+
+--[[
+    @desc: 添加一个消息
+    author:{author}
+    time:2019-06-15 01:42:36
+    --@name: 消息名
+	--@callback: 消息回调
+	--@ob: 消息监听er
+    @return:
+]]
+function MsgCenter:AddMsg(name, callback, ob)
+    local callList = self.msgDic[name] or {}
+    callList[callback] = ob
+end
+
+--[[
+    @desc: 发送消息
+    author:{author}
+    time:2019-06-15 01:43:35
+    --@name: 消息名
+	--@args: 参数
+    @return: 
+]]
+function MsgCenter:Broadcast(name, ...)
+    local callList = self.msgDic[name]
+    if callList == nil then
+        return
+    end
+    for callback, ob in pairs(callList) do
+        if callback then callback(ob, ...) end
+    end
+end
+
+--[[
+    @desc: 移除消息
+    author:{author}
+    time:2019-06-15 01:44:23
+    --@name: 消息名
+	--@callback: 消息回调
+    @return:
+]]
+function MsgCenter:RemoveMsg(name, callback)
+    local callList = self.msgDic[name]
+    if callList == nil then
+        return
+    end
+    callList[callList] = nil
+end
+
+--[[
+    @desc: 移除消息名的所有消息
+    author:{author}
+    time:2019-06-15 01:45:00
+    --@name: 消息名
+    @return:
+]]
+function MsgCenter:RemoveMsgByName(name)
+    self.msgDic[name] = nil
+end
+
+--[[
+    @desc: 清理所有消息
+    author:{author}
+    time:2019-06-15 01:45:25
+    @return:
+]]
+function MsgCenter:Clear()
+    self.msgDic = {}
+end
+
+function MsgCenter:Delete()
+    self.msgDic = nil
+end
+
+return MsgCenter

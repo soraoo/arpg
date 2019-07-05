@@ -1,0 +1,47 @@
+--[[
+    实现lua oop都全局方法
+    --USES:
+    1.定义类：Class(className, superClass)
+    2.创建类实例：local obj = Object()
+    3.调用基类方法：local base = SuperClass;
+                base.xxx(self)
+]]
+
+--[[
+    类类型
+]]
+ClassType = {
+    Class = 1,
+    Instance = 2,
+}
+
+function Class(className, superClass)
+    assert(type(className)=="string", "need a class name")
+    local clazz = {}
+    clazz.__classType = ClassType.Class
+    clazz.__name = className
+    if superClass then
+        clazz.super = superClass
+    else
+        clazz.Ctor = function()end
+        clazz.Delete = function()end
+    end
+    setmetatable(clazz, {
+        __index = superClass,
+        __call = function(...)
+            local o = {}
+            o.__clazz = clazz
+            o.__classType = ClassType.Instance
+            setmetatable(o, {__index = clazz})
+            o.Ctor(o, ...)
+            return o
+        end,
+        __tostring = function(ins)
+            return string.format("clazz-[%s]",ins.__name)
+        end,
+        __gc = function(ins)
+            ins.Delete(ins)
+        end
+    })
+    return clazz
+end

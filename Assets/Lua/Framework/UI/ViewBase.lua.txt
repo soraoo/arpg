@@ -1,0 +1,74 @@
+--[[
+    MVC-V基类
+]]
+local UIManager = require "Framework.UI.UIManager"
+
+local ViewBase = Class("ViewBase", IUpdate)
+
+local function CacheListener(self, name, callback)
+    local callbackList = self.callbackDic[name] or {}
+    callbackList[callback] = false
+end
+
+local function ClearListener(self, name, callback)
+    local callbackList = self.callbackDic[name]
+    if callback == nil then
+        return
+    end
+    callbackList[name] = nil
+end
+
+function ViewBase:Ctor(go,controller)
+    self.trans = go.transform
+    self.obj = go.gameObject
+    self.active = false
+    self.callbackDic = {}
+    self.controller = controller
+end
+
+function ViewBase:OnCreate()
+    self:OnAddListener()
+end
+
+function ViewBase:OnShow()
+    self.active = true
+end
+
+function ViewBase:OnHide()
+    self.active = false
+end
+
+function ViewBase:OnDestroy()
+    self:OnRemoveListener()
+    for name, callbackList in pairs(self.callbackDic) do
+        for callback, _ in pairs(callbackList) do
+            self:RemoveListener(name, callback)
+        end
+    end
+    self.callbackDic = {}
+end
+
+function ViewBase:OnAddListener()
+end
+
+function ViewBase:OnRemoveListener()
+end
+
+function ViewBase:AddListener(ob, name, callback)
+    CacheListener(self, name, callback)
+    UIManager:AddListener(ob, name, callback)
+end
+
+function ViewBase:RemoveListener(name, callback)
+    ClearListener(self, name, callback)
+    UIManager:RemoveListener(name, callback)
+end
+
+function ViewBase:Delete()
+    self.trans = nil
+    self.obj = nil
+    self.active = nil
+    self.callbackDic = nil
+end
+
+return ViewBase
